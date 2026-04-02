@@ -17,25 +17,38 @@ export default function App() {
   const [servings, setServings] = useState("");
   const [recipes, setRecipes] = useState([]);
   const [editingRecipe, setEditingRecipe] = useState(null);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     fetch("/api/db-status")
-      .then((res) => res.json())
-      .then((data) => {
-        setStatus(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setStatus({ connected: false, error: "Could not reach server" });
-        setLoading(false);
-      });
+      .then((r) => r.json())
+      .then(setStatus)
+      .catch(() => setStatus({ connected: false, error: "Could not reach server" }));
   }, []);
+
+  const panelTitle = {
+    users: "Users", recipes: "Recipes", ingredients: "Ingredients",
+    reviews: "Reviews", categories: "Categories", dietary: "Dietary flags",
+    cuisines: "Cuisines", collections: "Recipe collections",
+    recipe_ingredient: "Recipe ingredients",
+  };
+
+  const panelSub = {
+    users: "Insert, update, or delete user accounts.",
+    recipes: "Manage recipe records.",
+    ingredients: "Manage the ingredient lookup table.",
+    reviews: "Add, edit, or remove recipe reviews.",
+    categories: "Manage recipe category lookup values.",
+    dietary: "Manage dietary flag values (e.g. Vegan, Gluten-Free).",
+    cuisines: "Manage cuisine lookup values.",
+    collections: "Manage user-created recipe collections.",
+    recipe_ingredient: "Link ingredients to recipes with quantity and unit.",
+  };
 
   const runQuery = () => {
     setQueryLoading(true);
     setError(null);
     setResult(null);
-
     fetch("/api/query", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -47,11 +60,13 @@ export default function App() {
         else setError(data.error);
         setQueryLoading(false);
       })
-      .catch(() => {
-        setError("Could not reach the server.");
-        setQueryLoading(false);
-      });
+      .catch(() => { setError("Could not reach the server."); setQueryLoading(false); });
   };
+
+  fetch("/api/db-status")
+    .then((r) => r.json())
+    .then((data) => { setStatus(data); setLoading(false); })  // add setLoading(false)
+    .catch(() => { setStatus({ connected: false, error: "Could not reach server" }); setLoading(false); })
 
   const insert_recipe = (recipe) => {
     setError(null);
@@ -276,6 +291,9 @@ export default function App() {
           </table>
         </div>
       )}
+      
+      {/* Toast */}
+      {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
     </div>
   );
 }

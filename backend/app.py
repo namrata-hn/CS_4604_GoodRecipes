@@ -112,7 +112,7 @@ def insert_recipe():
         db.close()
         return jsonify({"success": True, "recipe_id": new_id})
     except Exception as e:
-        return jsonify({"success": False, "error": str(e) + " - Recipe ID: " + new_id}), 500
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/recipes/<user_id>', methods=['GET'])
 def get_recipe(user_id):
@@ -338,7 +338,7 @@ def insert_dietary_flag():
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
-            "INSERT INTO DIETARYFLAG (name, description) VALUES (%s, %s)",
+            "INSERT INTO DIETARY_FLAG (name, description) VALUES (%s, %s)",
             (data['name'], data.get('description'))
         )
         db.commit()
@@ -361,7 +361,7 @@ def update_dietary_flag(flag_id):
         values = list(fields.values()) + [flag_id]
         db = get_db()
         cursor = db.cursor()
-        cursor.execute(f"UPDATE DIETARYFLAG SET {set_clause} WHERE flag_id = %s", values)
+        cursor.execute(f"UPDATE DIETARY_FLAG SET {set_clause} WHERE flag_id = %s", values)
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -374,7 +374,7 @@ def delete_dietary_flag(flag_id):
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("DELETE FROM DIETARYFLAG WHERE flag_id = %s", (flag_id,))
+        cursor.execute("DELETE FROM DIETARY_FLAG WHERE flag_id = %s", (flag_id,))
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -448,7 +448,7 @@ def insert_collection():
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
-            """INSERT INTO RECIPECOLLECTION (user_id, title, description, shared_with, privacy_status)
+            """INSERT INTO RECIPE_COLLECTION (user_id, title, description, shared_with, privacy_status)
                VALUES (%s, %s, %s, %s, %s)""",
             (data['user_id'], data['title'], data.get('description'),
              data.get('shared_with'), data.get('privacy_status', 'private'))
@@ -473,7 +473,7 @@ def update_collection(collection_id):
         values = list(fields.values()) + [collection_id]
         db = get_db()
         cursor = db.cursor()
-        cursor.execute(f"UPDATE RECIPECOLLECTION SET {set_clause} WHERE collection_id = %s", values)
+        cursor.execute(f"UPDATE RECIPE_COLLECTION SET {set_clause} WHERE collection_id = %s", values)
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -486,7 +486,7 @@ def delete_collection(collection_id):
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("DELETE FROM RECIPECOLLECTION WHERE collection_id = %s", (collection_id,))
+        cursor.execute("DELETE FROM RECIPE_COLLECTION WHERE collection_id = %s", (collection_id,))
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
