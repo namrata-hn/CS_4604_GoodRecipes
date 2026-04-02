@@ -21,9 +21,15 @@ export default function App() {
 
   useEffect(() => {
     fetch("/api/db-status")
-      .then((r) => r.json())
-      .then(setStatus)
-      .catch(() => setStatus({ connected: false, error: "Could not reach server" }));
+      .then((res) => res.json())
+      .then((data) => {
+        setStatus(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setStatus({ connected: false, error: "Could not reach server" });
+        setLoading(false);
+      });
   }, []);
 
   const panelTitle = {
@@ -62,11 +68,6 @@ export default function App() {
       })
       .catch(() => { setError("Could not reach the server."); setQueryLoading(false); });
   };
-
-  fetch("/api/db-status")
-    .then((r) => r.json())
-    .then((data) => { setStatus(data); setLoading(false); })  // add setLoading(false)
-    .catch(() => { setStatus({ connected: false, error: "Could not reach server" }); setLoading(false); })
 
   const insert_recipe = (recipe) => {
     setError(null);
