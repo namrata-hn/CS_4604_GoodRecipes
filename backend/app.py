@@ -3,6 +3,7 @@ from flask_cors import CORS
 import mysql.connector
 from dotenv import load_dotenv
 import os
+import uuid
 
 load_dotenv()
 
@@ -100,6 +101,7 @@ def insert_recipe():
         data = request.get_json()
         db = get_db()
         cursor = db.cursor()
+        new_id = str(uuid.uuid4())[:8]  # Generate a short unique ID for the recipe
         cursor.execute(
             """INSERT INTO RECIPE (user_id, title, description, instructions, prep_time, cook_time, servings)
                VALUES (%s, %s, %s, %s, %s, %s, %s)""",
@@ -107,23 +109,31 @@ def insert_recipe():
              data.get('prep_time'), data.get('cook_time'), data.get('servings'))
         )
         db.commit()
-        new_id = cursor.lastrowid
         db.close()
         return jsonify({"success": True, "recipe_id": new_id})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route('/api/recipes/<user_id>', methods=['GET'])
+def get_recipe(user_id):
+    try:
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM RECIPE WHERE user_id = %s", (user_id,))
+        recipes = cursor.fetchall()
+        db.close()
+        if recipes:
+            return jsonify({"success": True, "recipes": recipes})
+        else:
+            return jsonify({"success": False, "error": "Recipe not found."}), 404
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/api/recipes/<int:recipe_id>', methods=['PUT'])
+
+@app.route('/api/recipes/<recipe_id>', methods=['PUT'])
 def update_recipe(recipe_id):
     try:
         data = request.get_json()
-        allowed = ['title', 'description', 'instructions', 'prep_time', 'cook_time', 'servings']
-        fields = {k: v for k, v in data.items() if k in allowed and v is not None and v != ''}
-        if not fields:
-            return jsonify({"success": False, "error": "No valid fields to update."}), 400
-        set_clause = ", ".join(f"{k} = %s" for k in fields)
-        values = list(fields.values()) + [recipe_id]
         db = get_db()
         cursor = db.cursor()
         cursor.execute(f"UPDATE RECIPE SET {set_clause} WHERE recipe_id = %s", values)
