@@ -3,6 +3,7 @@ from flask_cors import CORS
 import mysql.connector
 from dotenv import load_dotenv
 import os
+import uuid
 
 load_dotenv()
 
@@ -46,7 +47,7 @@ def insert_user():
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
-            "INSERT INTO User (username, email, password, role) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO USER (username, email, password, role) VALUES (%s, %s, %s, %s)",
             (data['username'], data['email'], data['password'], data['role'])
         )
         db.commit()
@@ -69,7 +70,7 @@ def update_user(user_id):
         values = list(fields.values()) + [user_id]
         db = get_db()
         cursor = db.cursor()
-        cursor.execute(f"UPDATE User SET {set_clause} WHERE user_id = %s", values)
+        cursor.execute(f"UPDATE USER SET {set_clause} WHERE user_id = %s", values)
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -82,7 +83,7 @@ def delete_user(user_id):
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("DELETE FROM User WHERE user_id = %s", (user_id,))
+        cursor.execute("DELETE FROM USER WHERE user_id = %s", (user_id,))
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -100,33 +101,47 @@ def insert_recipe():
         data = request.get_json()
         db = get_db()
         cursor = db.cursor()
+        new_id = str(uuid.uuid4())[:8]  # Generate a short unique ID for the recipe
         cursor.execute(
-            """INSERT INTO Recipe (user_id, title, description, instructions, prep_time, cook_time, servings)
-               VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-            (data['user_id'], data['title'], data.get('description'), data.get('instructions'),
+            """INSERT INTO RECIPE (recipe_id, user_id, title, description, instructions, prep_time, cook_time, servings)
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+            (new_id, data['user_id'], data['title'], data.get('description'), data.get('instructions'),
              data.get('prep_time'), data.get('cook_time'), data.get('servings'))
         )
         db.commit()
-        new_id = cursor.lastrowid
         db.close()
         return jsonify({"success": True, "recipe_id": new_id})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route('/api/recipes/<user_id>', methods=['GET'])
+def get_recipe(user_id):
+    try:
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM RECIPE WHERE user_id = %s", (user_id,))
+        recipes = cursor.fetchall()
+        db.close()
+        if recipes:
+            return jsonify({"success": True, "recipes": recipes})
+        else:
+            return jsonify({"success": False, "error": "Recipe not found."}), 404
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/api/recipes/<int:recipe_id>', methods=['PUT'])
+
+@app.route('/api/recipes/<recipe_id>', methods=['PUT'])
 def update_recipe(recipe_id):
     try:
         data = request.get_json()
-        allowed = ['title', 'description', 'instructions', 'prep_time', 'cook_time', 'servings']
-        fields = {k: v for k, v in data.items() if k in allowed and v is not None and v != ''}
-        if not fields:
-            return jsonify({"success": False, "error": "No valid fields to update."}), 400
-        set_clause = ", ".join(f"{k} = %s" for k in fields)
-        values = list(fields.values()) + [recipe_id]
         db = get_db()
         cursor = db.cursor()
-        cursor.execute(f"UPDATE Recipe SET {set_clause} WHERE recipe_id = %s", values)
+        cursor.execute(
+            """UPDATE RECIPE SET title=%s, description=%s, instructions=%s,
+            prep_time=%s, cook_time=%s, servings=%s WHERE recipe_id=%s""",
+            (data['title'], data.get('description'), data.get('instructions'),
+            data.get('prep_time'), data.get('cook_time'), data.get('servings'), recipe_id)
+        )
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -139,7 +154,7 @@ def delete_recipe(recipe_id):
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("DELETE FROM Recipe WHERE recipe_id = %s", (recipe_id,))
+        cursor.execute("DELETE FROM RECIPE WHERE recipe_id = %s", (recipe_id,))
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -158,7 +173,7 @@ def insert_ingredient():
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
-            "INSERT INTO Ingredient (name, description) VALUES (%s, %s)",
+            "INSERT INTO INGREDIENT (name, description) VALUES (%s, %s)",
             (data['name'], data.get('description'))
         )
         db.commit()
@@ -181,7 +196,7 @@ def update_ingredient(ingredient_id):
         values = list(fields.values()) + [ingredient_id]
         db = get_db()
         cursor = db.cursor()
-        cursor.execute(f"UPDATE Ingredient SET {set_clause} WHERE ingredient_id = %s", values)
+        cursor.execute(f"UPDATE INGREDIENT SET {set_clause} WHERE ingredient_id = %s", values)
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -194,7 +209,7 @@ def delete_ingredient(ingredient_id):
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("DELETE FROM Ingredient WHERE ingredient_id = %s", (ingredient_id,))
+        cursor.execute("DELETE FROM INGREDIENT WHERE ingredient_id = %s", (ingredient_id,))
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -213,7 +228,7 @@ def insert_review():
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
-            "INSERT INTO Review (recipe_id, user_id, comment, rating) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO REVIEW (recipe_id, user_id, comment, rating) VALUES (%s, %s, %s, %s)",
             (data['recipe_id'], data['user_id'], data.get('comment'), data.get('rating'))
         )
         db.commit()
@@ -236,7 +251,7 @@ def update_review(review_id):
         values = list(fields.values()) + [review_id]
         db = get_db()
         cursor = db.cursor()
-        cursor.execute(f"UPDATE Review SET {set_clause} WHERE review_id = %s", values)
+        cursor.execute(f"UPDATE REVIEW SET {set_clause} WHERE review_id = %s", values)
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -249,7 +264,7 @@ def delete_review(review_id):
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("DELETE FROM Review WHERE review_id = %s", (review_id,))
+        cursor.execute("DELETE FROM REVIEW WHERE review_id = %s", (review_id,))
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -268,7 +283,7 @@ def insert_category():
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
-            "INSERT INTO Category (name, description) VALUES (%s, %s)",
+            "INSERT INTO CATEGORY (name, description) VALUES (%s, %s)",
             (data['name'], data.get('description'))
         )
         db.commit()
@@ -291,7 +306,7 @@ def update_category(category_id):
         values = list(fields.values()) + [category_id]
         db = get_db()
         cursor = db.cursor()
-        cursor.execute(f"UPDATE Category SET {set_clause} WHERE category_id = %s", values)
+        cursor.execute(f"UPDATE CATEGORY SET {set_clause} WHERE category_id = %s", values)
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -304,7 +319,7 @@ def delete_category(category_id):
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("DELETE FROM Category WHERE category_id = %s", (category_id,))
+        cursor.execute("DELETE FROM CATEGORY WHERE category_id = %s", (category_id,))
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -323,7 +338,7 @@ def insert_dietary_flag():
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
-            "INSERT INTO DietaryFlag (name, description) VALUES (%s, %s)",
+            "INSERT INTO DIETARYFLAG (name, description) VALUES (%s, %s)",
             (data['name'], data.get('description'))
         )
         db.commit()
@@ -346,7 +361,7 @@ def update_dietary_flag(flag_id):
         values = list(fields.values()) + [flag_id]
         db = get_db()
         cursor = db.cursor()
-        cursor.execute(f"UPDATE DietaryFlag SET {set_clause} WHERE flag_id = %s", values)
+        cursor.execute(f"UPDATE DIETARYFLAG SET {set_clause} WHERE flag_id = %s", values)
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -359,7 +374,7 @@ def delete_dietary_flag(flag_id):
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("DELETE FROM DietaryFlag WHERE flag_id = %s", (flag_id,))
+        cursor.execute("DELETE FROM DIETARYFLAG WHERE flag_id = %s", (flag_id,))
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -378,7 +393,7 @@ def insert_cuisine():
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
-            "INSERT INTO Cuisine (name, description) VALUES (%s, %s)",
+            "INSERT INTO CUISINE (name, description) VALUES (%s, %s)",
             (data['name'], data.get('description'))
         )
         db.commit()
@@ -401,7 +416,7 @@ def update_cuisine(cuisine_id):
         values = list(fields.values()) + [cuisine_id]
         db = get_db()
         cursor = db.cursor()
-        cursor.execute(f"UPDATE Cuisine SET {set_clause} WHERE cuisine_id = %s", values)
+        cursor.execute(f"UPDATE CUISINE SET {set_clause} WHERE cuisine_id = %s", values)
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -414,7 +429,7 @@ def delete_cuisine(cuisine_id):
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("DELETE FROM Cuisine WHERE cuisine_id = %s", (cuisine_id,))
+        cursor.execute("DELETE FROM CUISINE WHERE cuisine_id = %s", (cuisine_id,))
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -433,7 +448,7 @@ def insert_collection():
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
-            """INSERT INTO RecipeCollection (user_id, title, description, shared_with, privacy_status)
+            """INSERT INTO RECIPECOLLECTION (user_id, title, description, shared_with, privacy_status)
                VALUES (%s, %s, %s, %s, %s)""",
             (data['user_id'], data['title'], data.get('description'),
              data.get('shared_with'), data.get('privacy_status', 'private'))
@@ -458,7 +473,7 @@ def update_collection(collection_id):
         values = list(fields.values()) + [collection_id]
         db = get_db()
         cursor = db.cursor()
-        cursor.execute(f"UPDATE RecipeCollection SET {set_clause} WHERE collection_id = %s", values)
+        cursor.execute(f"UPDATE RECIPECOLLECTION SET {set_clause} WHERE collection_id = %s", values)
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -471,7 +486,7 @@ def delete_collection(collection_id):
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("DELETE FROM RecipeCollection WHERE collection_id = %s", (collection_id,))
+        cursor.execute("DELETE FROM RECIPECOLLECTION WHERE collection_id = %s", (collection_id,))
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -490,7 +505,7 @@ def insert_recipe_ingredient():
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
-            "INSERT INTO Recipe_Ingredient (recipe_id, ingredient_id, quantity, unit) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO RECIPE_INGREDIENT (recipe_id, ingredient_id, quantity, unit) VALUES (%s, %s, %s, %s)",
             (data['recipe_id'], data['ingredient_id'], data.get('quantity'), data.get('unit'))
         )
         db.commit()
@@ -513,7 +528,7 @@ def update_recipe_ingredient(recipe_id, ingredient_id):
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
-            f"UPDATE Recipe_Ingredient SET {set_clause} WHERE recipe_id = %s AND ingredient_id = %s",
+            f"UPDATE RECIPE_INGREDIENT SET {set_clause} WHERE recipe_id = %s AND ingredient_id = %s",
             values
         )
         db.commit()
@@ -529,7 +544,7 @@ def delete_recipe_ingredient(recipe_id, ingredient_id):
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
-            "DELETE FROM Recipe_Ingredient WHERE recipe_id = %s AND ingredient_id = %s",
+            "DELETE FROM RECIPE_INGREDIENT WHERE recipe_id = %s AND ingredient_id = %s",
             (recipe_id, ingredient_id)
         )
         db.commit()
