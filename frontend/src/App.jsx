@@ -20,37 +20,28 @@ export default function App() {
 
   useEffect(() => {
     fetch("/api/db-status")
-      .then((res) => res.json())
-      .then((data) => {
-        setStatus(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setStatus({ connected: false, error: "Could not reach server" });
-        setLoading(false);
-      });
+      .then((r) => r.json())
+      .then(setDbStatus)
+      .catch(() => setDbStatus({ connected: false, error: "Could not reach server" }));
   }, []);
 
-  const runQuery = () => {
-    setQueryLoading(true);
-    setError(null);
-    setResult(null);
+  const panelTitle = {
+    users: "Users", recipes: "Recipes", ingredients: "Ingredients",
+    reviews: "Reviews", categories: "Categories", dietary: "Dietary flags",
+    cuisines: "Cuisines", collections: "Recipe collections",
+    recipe_ingredient: "Recipe ingredients",
+  };
 
-    fetch("/api/query", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setResult(data);
-        else setError(data.error);
-        setQueryLoading(false);
-      })
-      .catch(() => {
-        setError("Could not reach the server.");
-        setQueryLoading(false);
-      });
+  const panelSub = {
+    users: "Insert, update, or delete user accounts.",
+    recipes: "Manage recipe records.",
+    ingredients: "Manage the ingredient lookup table.",
+    reviews: "Add, edit, or remove recipe reviews.",
+    categories: "Manage recipe category lookup values.",
+    dietary: "Manage dietary flag values (e.g. Vegan, Gluten-Free).",
+    cuisines: "Manage cuisine lookup values.",
+    collections: "Manage user-created recipe collections.",
+    recipe_ingredient: "Link ingredients to recipes with quantity and unit.",
   };
 
   const insert_recipe = (recipe) => {
@@ -275,7 +266,10 @@ export default function App() {
             </tbody>
           </table>
         </div>
-      )}
-    </div>
+      </div>
+
+      {/* Toast */}
+      {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
+    </>
   );
 }

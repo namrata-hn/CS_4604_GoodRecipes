@@ -103,9 +103,9 @@ def insert_recipe():
         cursor = db.cursor()
         new_id = str(uuid.uuid4())[:8]  # Generate a short unique ID for the recipe
         cursor.execute(
-            """INSERT INTO RECIPE (recipe_id, user_id, title, description, instructions, prep_time, cook_time, servings)
-               VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
-            (new_id, data['user_id'], data['title'], data.get('description'), data.get('instructions'),
+            """INSERT INTO RECIPE (user_id, title, description, instructions, prep_time, cook_time, servings)
+               VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+            (data['user_id'], data['title'], data.get('description'), data.get('instructions'),
              data.get('prep_time'), data.get('cook_time'), data.get('servings'))
         )
         db.commit()
@@ -136,12 +136,7 @@ def update_recipe(recipe_id):
         data = request.get_json()
         db = get_db()
         cursor = db.cursor()
-        cursor.execute(
-            """UPDATE RECIPE SET title=%s, description=%s, instructions=%s,
-            prep_time=%s, cook_time=%s, servings=%s WHERE recipe_id=%s""",
-            (data['title'], data.get('description'), data.get('instructions'),
-            data.get('prep_time'), data.get('cook_time'), data.get('servings'), recipe_id)
-        )
+        cursor.execute(f"UPDATE RECIPE SET {set_clause} WHERE recipe_id = %s", values)
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -338,7 +333,7 @@ def insert_dietary_flag():
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
-            "INSERT INTO DIETARYFLAG (name, description) VALUES (%s, %s)",
+            "INSERT INTO DIETARY_FLAG (name, description) VALUES (%s, %s)",
             (data['name'], data.get('description'))
         )
         db.commit()
@@ -361,7 +356,7 @@ def update_dietary_flag(flag_id):
         values = list(fields.values()) + [flag_id]
         db = get_db()
         cursor = db.cursor()
-        cursor.execute(f"UPDATE DIETARYFLAG SET {set_clause} WHERE flag_id = %s", values)
+        cursor.execute(f"UPDATE DIETARY_FLAG SET {set_clause} WHERE flag_id = %s", values)
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -374,7 +369,7 @@ def delete_dietary_flag(flag_id):
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("DELETE FROM DIETARYFLAG WHERE flag_id = %s", (flag_id,))
+        cursor.execute("DELETE FROM DIETARY_FLAG WHERE flag_id = %s", (flag_id,))
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -448,7 +443,7 @@ def insert_collection():
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
-            """INSERT INTO RECIPECOLLECTION (user_id, title, description, shared_with, privacy_status)
+            """INSERT INTO RECIPE_COLLECTION (user_id, title, description, shared_with, privacy_status)
                VALUES (%s, %s, %s, %s, %s)""",
             (data['user_id'], data['title'], data.get('description'),
              data.get('shared_with'), data.get('privacy_status', 'private'))
@@ -473,7 +468,7 @@ def update_collection(collection_id):
         values = list(fields.values()) + [collection_id]
         db = get_db()
         cursor = db.cursor()
-        cursor.execute(f"UPDATE RECIPECOLLECTION SET {set_clause} WHERE collection_id = %s", values)
+        cursor.execute(f"UPDATE RECIPE_COLLECTION SET {set_clause} WHERE collection_id = %s", values)
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
@@ -486,7 +481,7 @@ def delete_collection(collection_id):
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("DELETE FROM RECIPECOLLECTION WHERE collection_id = %s", (collection_id,))
+        cursor.execute("DELETE FROM RECIPE_COLLECTION WHERE collection_id = %s", (collection_id,))
         db.commit()
         db.close()
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
