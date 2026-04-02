@@ -101,7 +101,7 @@ def insert_recipe():
         data = request.get_json()
         db = get_db()
         cursor = db.cursor()
-        new_id = str(uuid.uuid4())[:8]  # Generate a short unique ID for the recipe
+        new_id = int.from_bytes(os.urandom(5), byteorder='little') % 9999999999  # Generate a short unique ID for the recipe
         cursor.execute(
             """INSERT INTO RECIPE (recipe_id, user_id, title, description, instructions, prep_time, cook_time, servings)
                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
@@ -112,7 +112,7 @@ def insert_recipe():
         db.close()
         return jsonify({"success": True, "recipe_id": new_id})
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"success": False, "error": str(e) + " - Recipe ID: " + new_id}), 500
 
 @app.route('/api/recipes/<user_id>', methods=['GET'])
 def get_recipe(user_id):
