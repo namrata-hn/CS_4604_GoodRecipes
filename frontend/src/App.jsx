@@ -1,30 +1,21 @@
 import { use, useEffect, useState } from "react";
 import "./App.css";
+import Login from './Login.jsx'
 
 export default function App() {
-  const [status, setStatus] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
-  const [queryLoading, setQueryLoading] = useState(false);
+
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
-  const [user_id, setUserId] = useState(1337); // Placeholder user ID for recipe insertion
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [instructions, setInstructions] = useState("");
-  const [prep_time, setPrepTime] = useState("");
-  const [cook_time, setCookTime] = useState("");
+  //const [user_id, setUserId] = useState(1337); // Placeholder user ID for recipe insertion
+  const [user_id, setUserId] = useState(null); 
+  const [form, setForm] = useState({
+    title: "", description: "", instructions: "",
+    prep_time: "", cook_time: "", servings: ""
+  });
   const [servings, setServings] = useState("");
   const [recipes, setRecipes] = useState([]);
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [toast, setToast] = useState(null);
-
-  useEffect(() => {
-    fetch("/api/db-status")
-      .then((r) => r.json())
-      .then(setStatus)
-      .catch(() => setStatus({ connected: false, error: "Could not reach server" }));
-  }, []);
 
   const panelTitle = {
     users: "Users", recipes: "Recipes", ingredients: "Ingredients",
@@ -45,28 +36,6 @@ export default function App() {
     recipe_ingredient: "Link ingredients to recipes with quantity and unit.",
   };
 
-  const runQuery = () => {
-    setQueryLoading(true);
-    setError(null);
-    setResult(null);
-    fetch("/api/query", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setResult(data);
-        else setError(data.error);
-        setQueryLoading(false);
-      })
-      .catch(() => { setError("Could not reach the server."); setQueryLoading(false); });
-  };
-
-  fetch("/api/db-status")
-    .then((r) => r.json())
-    .then((data) => { setStatus(data); setLoading(false); })  // add setLoading(false)
-    .catch(() => { setStatus({ connected: false, error: "Could not reach server" }); setLoading(false); })
 
   const insert_recipe = (recipe) => {
     setError(null);
@@ -81,6 +50,7 @@ export default function App() {
       .then(data => {
         if (data.success) {
           setResult(data);
+          setForm({ title: "", description: "", instructions: "", prep_time: "", cook_time: "", servings: "" });
           fetchRecipes(); // Refresh the recipe list after insertion
         } 
         else setError(data.error);
@@ -103,6 +73,7 @@ export default function App() {
       .then(data => {
         if (data.success) {
           setResult(data);
+          setForm({ title: "", description: "", instructions: "", prep_time: "", cook_time: "", servings: "" });
           if (recipes.length === 1) {
             setRecipes([]);
           } else {
@@ -152,78 +123,45 @@ export default function App() {
   };
 
   useEffect(() => {
-    fetchRecipes();
+    if (user_id) fetchRecipes();
   }, [user_id]);
 
 
+  if (!user_id) return <Login onLogin={setUserId} />;
+
   return (
     <div>
-      {loading ? (<p>Checking connection...</p>) : status.connected ? (
-        <p style={{ color: "green" }}>
-          Database connected! Connected to {status.database}.
-        </p>
-      ) : (
-        <p style={{ color: "red" }}>
-          Connection failed: {status.error}
-        </p>
-      )}
-
-      <div>
-        <textarea
-          className="query-box"
-          rows={5}
-          placeholder="Enter your SQL query... e.g. SELECT * FROM user;"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-
-        <button className="run-btn" onClick={runQuery} disabled={queryLoading}>
-          {queryLoading ? "Running..." : "Run Query"}
-        </button>
-      </div>
-
-      <div classname="recipeAddition" style={{ marginTop: "2rem", padding: "1rem", border: "1px solid #ccc", display: "flex"}}>
+      <div className="recipeAddition" style={{ marginTop: "2rem", padding: "1rem", border: "1px solid #ccc", display: "flex"}}>
         <div style={{ flex: 1, marginRight: "1rem" }}>
         <h1>Add Recipe</h1>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title" />
-          <br />
-        <input
-          type="text"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Description" />
-          <br />
-        <input
-          type="text"
-          value={instructions}
-          onChange={(e) => setInstructions(e.target.value)}
-          placeholder="Instructions" />
-          <br />
-        <input
-          type="text"
-          value={prep_time}
-          onChange={(e) => setPrepTime(e.target.value)}
-          placeholder="Prep Time" />
-          <br />
-        <input
-          type="text"
-          value={cook_time}
-          onChange={(e) => setCookTime(e.target.value)}
-          placeholder="Cook Time" />
-          <br />
-        <input
-          type="text"
-          value={servings}
-          onChange={(e) => setServings(e.target.value)}
-          placeholder="Servings" />
-          <br />
-        <button onClick={() => insert_recipe({ user_id, title, description, instructions, prep_time, cook_time, servings })}>
+        <input value={form.title} 
+          onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))} 
+          placeholder="Title" /><br />
+
+        <input value={form.description} 
+          onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))} 
+          placeholder="Description" /><br />
+
+        <input value={form.instructions} 
+          onChange={e => setForm(prev => ({ ...prev, instructions: e.target.value }))} 
+          placeholder="Instructions" /><br />
+
+        <input value={form.prep_time} 
+          onChange={e => setForm(prev => ({ ...prev, prep_time: e.target.value }))} 
+          placeholder="Prep Time" /><br />
+
+        <input value={form.cook_time} 
+          onChange={e => setForm(prev => ({ ...prev, cook_time: e.target.value }))} 
+          placeholder="Cook Time" /><br />
+
+        <input value={form.servings} 
+          onChange={e => setForm(prev => ({ ...prev, servings: e.target.value }))} 
+          placeholder="Servings" /><br />
+
+        <button onClick={() => insert_recipe({ user_id, ...form })}>
           Add Recipe
         </button>
+
         </div>
         <div style={{ flex: 1, marginLeft: "1rem", padding: "1rem", borderRadius: "8px" }}>
           <h1>Your Recipes</h1>

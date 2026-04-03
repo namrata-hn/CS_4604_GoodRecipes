@@ -46,9 +46,10 @@ def insert_user():
         data = request.get_json()
         db = get_db()
         cursor = db.cursor()
+        new_id = int.from_bytes(os.urandom(5), byteorder='little') % 9999999999  # Generate a short unique ID for the recipe
         cursor.execute(
-            "INSERT INTO USER (username, email, password, role) VALUES (%s, %s, %s, %s)",
-            (data['username'], data['email'], data['password'], data['role'])
+            "INSERT INTO USER (user_id, username, email, password, role) VALUES (%s, %s, %s, %s, %s)",
+            (new_id, data['username'], data['email'], data['password'], data['role'])
         )
         db.commit()
         new_id = cursor.lastrowid
@@ -89,8 +90,29 @@ def delete_user(user_id):
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+    
 
-
+@app.route('/api/login', methods=['POST'])
+def login():
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT user_id FROM USER WHERE username = %s AND password = %s",
+            (username, password)
+        )
+        user = cursor.fetchone()
+        db.close()
+        if user:
+            return jsonify({"success": True, "user_id": user['user_id']})
+        else:
+            return jsonify({"success": False, "error": "Invalid username or password"}), 401
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+    
 # ──────────────────────────────────────────────
 # RECIPES
 # ──────────────────────────────────────────────
@@ -122,10 +144,7 @@ def get_recipe(user_id):
         cursor.execute("SELECT * FROM RECIPE WHERE user_id = %s", (user_id,))
         recipes = cursor.fetchall()
         db.close()
-        if recipes:
-            return jsonify({"success": True, "recipes": recipes})
-        else:
-            return jsonify({"success": False, "error": "Recipe not found."}), 404
+        return jsonify({"success": True, "recipes": recipes})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
@@ -581,4 +600,4 @@ def run_query():
 
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
