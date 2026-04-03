@@ -122,10 +122,7 @@ def get_recipe(user_id):
         cursor.execute("SELECT * FROM RECIPE WHERE user_id = %s", (user_id,))
         recipes = cursor.fetchall()
         db.close()
-        if recipes:
-            return jsonify({"success": True, "recipes": recipes})
-        else:
-            return jsonify({"success": False, "error": "Recipe not found."}), 404
+        return jsonify({"success": True, "recipes": recipes})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
