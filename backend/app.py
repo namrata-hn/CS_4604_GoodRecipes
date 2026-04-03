@@ -417,7 +417,7 @@ def insert_cuisine():
         cursor = db.cursor()
         new_id = int.from_bytes(os.urandom(5), byteorder='little') % 9999999999  # Generate a short unique ID for the recipe
         cursor.execute(
-            "INSERT INTO CUISINE (cuisine_id, name, description) VALUES (%s, %s)",
+            "INSERT INTO CUISINE (cuisine_id, name, description) VALUES (%s, %s, %s)",
             (new_id, data['name'], data.get('description'))
         )
         db.commit()

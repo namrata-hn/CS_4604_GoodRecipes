@@ -3,6 +3,8 @@ NOTE: You must have Docker Desktop installed if you want to run the backend in a
 To build and run dockerfile, go into backend directory and enter these commands: 
 
 docker build -t backend . 
+
+
 docker run -p 5000:5000 --env-file .env --name backend backend
 
 To end the container, type: docker stop backend
@@ -10,11 +12,15 @@ To end the container, type: docker stop backend
 To start container back up, type: docker start backend
 
 If you made an edit to backend code and need the container to reflect the new updates, you need to remove the container with:
+
+
 docker rm backend
 
 and then rebuild it:
 
-docker build -t backend . 
+docker build -t backend .
+
+
 docker run -p 5000:5000 --env-file .env --name backend backend
 
 IF you choose to not use a Docker container, you need to install dependencies in requirements.txt and then run python app.py
