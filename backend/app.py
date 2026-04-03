@@ -53,7 +53,6 @@ def insert_user():
             (new_id, data['username'], data['email'], data['password'], data['role'])
         )
         db.commit()
-        new_id = cursor.lastrowid
         db.close()
         return jsonify({"success": True, "user_id": new_id})
     except Exception as e:
@@ -198,7 +197,6 @@ def insert_ingredient():
             (new_id, data['name'], data.get('description'))
         )
         db.commit()
-        new_id = cursor.lastrowid
         db.close()
         return jsonify({"success": True, "ingredient_id": new_id})
     except Exception as e:
@@ -254,7 +252,6 @@ def insert_review():
             (new_id, data['recipe_id'], data['user_id'], data.get('comment'), data.get('rating'))
         )
         db.commit()
-        new_id = cursor.lastrowid
         db.close()
         return jsonify({"success": True, "review_id": new_id})
     except Exception as e:
@@ -310,7 +307,6 @@ def insert_category():
             (new_id, data['name'], data.get('description'))
         )
         db.commit()
-        new_id = cursor.lastrowid
         db.close()
         return jsonify({"success": True, "category_id": new_id})
     except Exception as e:
@@ -366,7 +362,6 @@ def insert_dietary_flag():
             (new_id, data['name'], data.get('description'))
         )
         db.commit()
-        new_id = cursor.lastrowid
         db.close()
         return jsonify({"success": True, "flag_id": new_id})
     except Exception as e:
@@ -422,7 +417,6 @@ def insert_cuisine():
             (new_id, data['name'], data.get('description'))
         )
         db.commit()
-        new_id = cursor.lastrowid
         db.close()
         return jsonify({"success": True, "cuisine_id": new_id})
     except Exception as e:
@@ -480,7 +474,6 @@ def insert_collection():
              data.get('shared_with'), data.get('privacy_status', 'private'))
         )
         db.commit()
-        new_id = cursor.lastrowid
         db.close()
         return jsonify({"success": True, "collection_id": new_id})
     except Exception as e:

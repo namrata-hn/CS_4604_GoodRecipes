@@ -38,7 +38,7 @@ export default function AuthPage() {
   return (
     <div className="auth-wrap">
       <div className="auth-panel">
-        <div className="auth-logo">🍽 Reciply</div>
+        <div className="auth-logo">🍽 GoodRecipes</div>
         <div className="auth-tagline">Discover, create & share recipes you love.</div>
 
         <div className="auth-tab-row">
