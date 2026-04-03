@@ -6,13 +6,11 @@ export default function App() {
 
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
-  //const [user_id, setUserId] = useState(1337); // Placeholder user ID for recipe insertion
   const [user_id, setUserId] = useState(null); 
   const [form, setForm] = useState({
     title: "", description: "", instructions: "",
     prep_time: "", cook_time: "", servings: ""
   });
-  const [servings, setServings] = useState("");
   const [recipes, setRecipes] = useState([]);
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [toast, setToast] = useState(null);

@@ -191,9 +191,10 @@ def insert_ingredient():
         data = request.get_json()
         db = get_db()
         cursor = db.cursor()
+        new_id = int.from_bytes(os.urandom(5), byteorder='little') % 9999999999  # Generate a short unique ID for the recipe
         cursor.execute(
-            "INSERT INTO INGREDIENT (name, description) VALUES (%s, %s)",
-            (data['name'], data.get('description'))
+            "INSERT INTO INGREDIENT (ingredient_id, name, description) VALUES (%s, %s, %s)",
+            (new_id, data['name'], data.get('description'))
         )
         db.commit()
         new_id = cursor.lastrowid
@@ -246,9 +247,10 @@ def insert_review():
         data = request.get_json()
         db = get_db()
         cursor = db.cursor()
+        new_id = int.from_bytes(os.urandom(5), byteorder='little') % 9999999999  # Generate a short unique ID for the recipe
         cursor.execute(
-            "INSERT INTO REVIEW (recipe_id, user_id, comment, rating) VALUES (%s, %s, %s, %s)",
-            (data['recipe_id'], data['user_id'], data.get('comment'), data.get('rating'))
+            "INSERT INTO REVIEW (review_id, recipe_id, user_id, comment, rating) VALUES (%s, %s, %s, %s, %s)",
+            (new_id, data['recipe_id'], data['user_id'], data.get('comment'), data.get('rating'))
         )
         db.commit()
         new_id = cursor.lastrowid
@@ -301,9 +303,10 @@ def insert_category():
         data = request.get_json()
         db = get_db()
         cursor = db.cursor()
+        new_id = int.from_bytes(os.urandom(5), byteorder='little') % 9999999999  # Generate a short unique ID for the recipe
         cursor.execute(
-            "INSERT INTO CATEGORY (name, description) VALUES (%s, %s)",
-            (data['name'], data.get('description'))
+            "INSERT INTO CATEGORY (category_id, name, description) VALUES (%s, %s, %s)",
+            (new_id, data['name'], data.get('description'))
         )
         db.commit()
         new_id = cursor.lastrowid
@@ -356,9 +359,10 @@ def insert_dietary_flag():
         data = request.get_json()
         db = get_db()
         cursor = db.cursor()
+        new_id = int.from_bytes(os.urandom(5), byteorder='little') % 9999999999  # Generate a short unique ID for the recipe
         cursor.execute(
-            "INSERT INTO DIETARY_FLAG (name, description) VALUES (%s, %s)",
-            (data['name'], data.get('description'))
+            "INSERT INTO DIETARY_FLAG (flag_id, name, description) VALUES (%s, %s, %s)",
+            (new_id, data['name'], data.get('description'))
         )
         db.commit()
         new_id = cursor.lastrowid
@@ -411,9 +415,10 @@ def insert_cuisine():
         data = request.get_json()
         db = get_db()
         cursor = db.cursor()
+        new_id = int.from_bytes(os.urandom(5), byteorder='little') % 9999999999  # Generate a short unique ID for the recipe
         cursor.execute(
-            "INSERT INTO CUISINE (name, description) VALUES (%s, %s)",
-            (data['name'], data.get('description'))
+            "INSERT INTO CUISINE (cuisine_id, name, description) VALUES (%s, %s)",
+            (new_id, data['name'], data.get('description'))
         )
         db.commit()
         new_id = cursor.lastrowid
@@ -466,10 +471,11 @@ def insert_collection():
         data = request.get_json()
         db = get_db()
         cursor = db.cursor()
+        new_id = int.from_bytes(os.urandom(5), byteorder='little') % 9999999999  # Generate a short unique ID for the recipe
         cursor.execute(
-            """INSERT INTO RECIPE_COLLECTION (user_id, title, description, shared_with, privacy_status)
-               VALUES (%s, %s, %s, %s, %s)""",
-            (data['user_id'], data['title'], data.get('description'),
+            """INSERT INTO RECIPE_COLLECTION (collection_id, user_id, title, description, shared_with, privacy_status)
+               VALUES (%s, %s, %s, %s, %s, %s)""",
+            (new_id, data['user_id'], data['title'], data.get('description'),
              data.get('shared_with'), data.get('privacy_status', 'private'))
         )
         db.commit()
