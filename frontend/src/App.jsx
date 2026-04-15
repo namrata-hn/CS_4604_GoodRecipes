@@ -1,6 +1,9 @@
 import { use, useEffect, useState } from "react";
 import "./App.css";
 import Login from './Login.jsx'
+import Signup from './Signup.jsx'
+import ChangePass from './ChangePass.jsx'
+import { Link, Routes, Route } from "react-router-dom";
 
 export default function App() {
 
@@ -125,10 +128,23 @@ export default function App() {
   }, [user_id]);
 
 
-  if (!user_id) return <Login onLogin={setUserId} />;
+  if (!user_id) {
+    return (
+      <Routes>
+        <Route path="/" element={<Login onLogin={setUserId} />} />
+        <Route path="/Signup" element={<Signup />} />
+        <Route path="/ChangePass" element={<ChangePass />} />
+      </Routes>
+    );
+  };
 
   return (
     <div>
+      <div id="logout-link" style={{ position: "absolute", top: "1rem", right: "1rem" }}>
+        <Link to="/" onClick={() => setUserId(null)}>
+          Logout
+        </Link>
+      </div>
       <div className="recipeAddition" style={{ marginTop: "2rem", padding: "1rem", border: "1px solid #ccc", display: "flex"}}>
         <div style={{ flex: 1, marginRight: "1rem" }}>
         <h1>Add Recipe</h1>
