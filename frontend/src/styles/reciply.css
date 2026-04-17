@@ -98,6 +98,54 @@ body {
 }
 .btn-logout:hover { border-color: var(--spice); color: var(--spice); }
 
+/* ── Nav Dropdown ── */
+.nav-dropdown-wrap { position: relative; }
+.nav-username-btn {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: none; border: none; cursor: pointer;
+  color: rgba(255,255,255,0.7); font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem; padding: 0.35rem 0.6rem; border-radius: 6px;
+  transition: background 0.2s;
+}
+.nav-username-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.nav-avatar {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--spice);
+  color: #fff; font-size: 0.75rem; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-chevron { font-size: 0.65rem; opacity: 0.6; }
+.nav-dropdown {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  background: var(--warm-white); border: 1px solid var(--border);
+  border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  min-width: 180px; overflow: hidden; z-index: 200;
+}
+.nav-dropdown-item {
+  display: flex; align-items: center; gap: 0.6rem;
+  width: 100%; padding: 0.7rem 1rem; background: none; border: none;
+  cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+  color: var(--ink); text-align: left; transition: background 0.15s;
+}
+.nav-dropdown-item:hover { background: var(--cream); }
+.nav-dropdown-item.danger { color: #C0392B; }
+.nav-dropdown-item.danger:hover { background: #FEF0EE; }
+.nav-dropdown-divider { height: 1px; background: var(--border); margin: 0.25rem 0; }
+
+/* ── Profile Modal ── */
+.profile-avatar-lg {
+  width: 64px; height: 64px; border-radius: 50%; background: var(--spice);
+  color: #fff; font-size: 1.6rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+.profile-info-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.75rem 0; border-bottom: 1px solid var(--border);
+  font-size: 0.92rem;
+}
+.profile-label { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.profile-id { font-size: 0.78rem; color: var(--muted); font-family: monospace; }
+
 /* ── Page Shell ── */
 .page { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem; }
 .page-title { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--ink); margin-bottom: 0.4rem; }
