@@ -15,13 +15,11 @@ export default function AuthPage() {
   const submit = async () => {
     setErr("");
     if (tab === "login") {
-      // Use the dedicated /api/login endpoint — returns { success, user_id }
       const d = await API("/api/login", {
         method: "POST",
         body: JSON.stringify({ username: f.username, password: f.password }),
       });
       if (d.success) {
-        // Store user_id + username in context (backend only returns user_id on login)
         setUser({ user_id: d.user_id, username: f.username });
         navigate("/");
       } else {
@@ -29,7 +27,12 @@ export default function AuthPage() {
       }
     } else {
       if (!f.username || !f.email || !f.password) { setErr("All fields required."); return; }
-      const d = await API("/api/users", { method: "POST", body: JSON.stringify(f) });
+
+      const d = await API("/api/signup", {
+        method: "POST",
+        body: JSON.stringify({ username: f.username, email: f.email, password: f.password }),
+      });
+
       if (d.success) { setTab("login"); setErr("Account created! Please sign in."); }
       else setErr(d.error || "Could not create account.");
     }

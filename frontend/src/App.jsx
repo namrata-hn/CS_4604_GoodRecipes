@@ -1,23 +1,22 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { UserProvider, useUser } from "./context/UserContext";
+import { Routes, Route, Navigate } from "react-router-dom";  // remove BrowserRouter import
+import { UserProvider } from "./context/UserProvider";
+import { useUser } from "./context/UserContext";
 import NavBar from "./components/NavBar";
 
-import AuthPage     from "./pages/AuthPage";
-import HomePage     from "./pages/HomePage";
+import AuthPage      from "./pages/AuthPage";
+import HomePage      from "./pages/HomePage";
 import MyRecipesPage from "./pages/MyRecipesPage";
-import BrowsePage   from "./pages/BrowsePage";
+import BrowsePage    from "./pages/BrowsePage";
 import CommunityPage from "./pages/CommunityPage";
-import SearchPage   from "./pages/SearchPage";
+import SearchPage    from "./pages/SearchPage";
 
 import "./styles/reciply.css";
 
-// ─── Protected route wrapper ──────────────────────────────────────────────────
 function RequireAuth({ children }) {
   const { user } = useUser();
   return user ? children : <Navigate to="/login" replace />;
 }
 
-// ─── Layout (nav + outlet) ────────────────────────────────────────────────────
 function AppLayout() {
   return (
     <>
@@ -28,31 +27,27 @@ function AppLayout() {
         <Route path="/browse"    element={<BrowsePage />} />
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/search"    element={<SearchPage />} />
-        {/* Catch-all → home */}
         <Route path="*"          element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );
 }
 
-// ─── Root ─────────────────────────────────────────────────────────────────────
 function InnerApp() {
   const { user } = useUser();
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={user ? <Navigate to="/" replace /> : <AuthPage />} />
-        <Route
-          path="/*"
-          element={
-            <RequireAuth>
-              <AppLayout />
-            </RequireAuth>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+    <Routes>  {/* ✅ No BrowserRouter here */}
+      <Route path="/login" element={user ? <Navigate to="/" replace /> : <AuthPage />} />
+      <Route
+        path="/*"
+        element={
+          <RequireAuth>
+            <AppLayout />
+          </RequireAuth>
+        }
+      />
+    </Routes>
   );
 }
 
