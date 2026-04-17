@@ -24,7 +24,7 @@ export default function NavBar() {
 
   return (
     <nav className="topnav">
-      <NavLink to="/" className="nav-logo">🍽 Reciply</NavLink>
+      <NavLink to="/" className="nav-logo">🍽 GoodRecipes</NavLink>
 
       <div className="nav-links">
         {NAV_LINKS.map(({ to, label }) => (
