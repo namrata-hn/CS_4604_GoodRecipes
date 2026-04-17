@@ -4,6 +4,7 @@ import mysql.connector
 from dotenv import load_dotenv
 import os
 import uuid
+import hashlib
 
 load_dotenv()
 
@@ -97,7 +98,7 @@ def login():
     try:
         data = request.get_json()
         username = data.get('username')
-        password = data.get('password')
+        password = hashlib.sha256(data.get('password').encode()).hexdigest()
         db = get_db()
         cursor = db.cursor(dictionary=True)
         cursor.execute(
@@ -112,7 +113,57 @@ def login():
             return jsonify({"success": False, "error": "Invalid username or password"}), 401
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
-    
+
+@app.route('/api/signup', methods=['POST'])
+def signup():
+    try:
+        data = request.get_json()
+        db = get_db()
+        cursor = db.cursor()
+
+        cursor.execute("SELECT user_id FROM USER WHERE username = %s", (data.get('username'),))
+        if cursor.fetchone():
+            db.close()
+            return jsonify({"success": False, "error": "Username already exists"}), 400
+
+        new_id = int.from_bytes(os.urandom(5), byteorder='little') % 9999999999  # Generate a short unique ID for the user
+        encrypted_password = hashlib.sha256(data.get('password').encode()).hexdigest()
+        cursor.execute(
+            "INSERT INTO USER (user_id, username, email, password, role) VALUES (%s, %s, %s, %s, %s)",
+            (new_id, data.get('username'), data.get('email'), encrypted_password, 'user')
+        )
+        db.commit()
+        db.close()
+        return jsonify({"success": True, "user_id": new_id})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/change_password', methods=['POST'])
+def change_password():
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        new_password = hashlib.sha256(data.get('new_password').encode()).hexdigest()
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+
+        cursor.execute("SELECT user_id FROM USER WHERE username = %s", (username,))
+        row = cursor.fetchone()
+        if not row:
+            db.close()
+            return jsonify({"success": False, "error": "User not found"}), 404
+
+        user_id = row['user_id']
+        cursor.execute(
+            "UPDATE USER SET password = %s WHERE user_id = %s",
+            (new_password, user_id)
+        )
+        db.commit()
+        db.close()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 # ──────────────────────────────────────────────
 # RECIPES
 # ──────────────────────────────────────────────
@@ -413,7 +464,7 @@ def insert_cuisine():
         cursor = db.cursor()
         new_id = int.from_bytes(os.urandom(5), byteorder='little') % 9999999999  # Generate a short unique ID for the recipe
         cursor.execute(
-            "INSERT INTO CUISINE (cuisine_id, name, description) VALUES (%s, %s)",
+            "INSERT INTO CUISINE (cuisine_id, name, description) VALUES (%s, %s, %s)",
             (new_id, data['name'], data.get('description'))
         )
         db.commit()
