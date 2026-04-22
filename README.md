@@ -52,7 +52,7 @@ Relational design supports **many-to-many relationships** for flexible tagging a
 ### 1. Install Backend Dependencies
 
 ```bash
-pip install python-dotenv flask flask-cors mysql-connector-python
+pip install python-dotenv flask flask-cors mysql-connector-python gunicorn
 ```
 
 ### 2. Start Frontend
