@@ -1,32 +1,90 @@
-NOTE: You must have Docker Desktop installed if you want to run the backend in a Docker container
+#  Good Recipes
 
-To build and run dockerfile, go into backend directory and enter these commands: 
+A social platform for discovering, organizing, and sharing recipes—all in one place.
 
-docker build -t backend . 
+---
 
+##  Features
 
-docker run -p 5000:5000 --env-file .env --name backend backend
+* Search and discover recipes
+* Create and manage recipe collections
+* Publish recipes with categories, ingredients, and dietary tags
+* Rate and review recipes
+* Social interaction (share & explore)
+* Secure authentication (hashed passwords)
 
-To end the container, type: docker stop backend
+### Admin Capabilities
 
-To start container back up, type: docker start backend
+* Manage users
+* Edit/delete inappropriate content
 
-If you made an edit to backend code and need the container to reflect the new updates, you need to remove the container with:
+---
 
+## Tech Stack
 
-docker rm backend
+* **Frontend:** React (JSX)
+* **Backend:** Flask (Python)
+* **Database:** MySQL (Aiven cloud hosting)
 
-and then rebuild it:
+---
 
-docker build -t backend .
+## Core Model
 
+* **Users** → create recipes, reviews, collections
+* **Recipes** → include ingredients, categories, dietary flags
+* **Collections** → organize saved recipes
+* **Reviews** → ratings + feedback
 
-docker run -p 5000:5000 --env-file .env --name backend backend
+Relational design supports **many-to-many relationships** for flexible tagging and organization.
 
-IF you choose to not use a Docker container, you need to install dependencies in requirements.txt and then run python app.py
+---
 
-I didn't make a Dockerfile for frontend aha.
+## Security
 
-To install dependencies for frontend, go into frontend directory and run: npm install
+* Password hashing (SHA256)
+* Parameterized queries (SQL injection protection)
+* Secure credential handling via `.env`
 
-To run frontend locally, type: npm run dev
+---
+
+## Setup
+
+### 1. Install Backend Dependencies
+
+```bash
+pip install python-dotenv flask flask-cors mysql-connector-python
+```
+
+### 2. Start Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### 3. Start Backend
+
+```bash
+cd backend
+python app.py
+```
+
+### 4. Configure Environment
+
+Create `/backend/.env`:
+
+```env
+DB_HOST=your_host
+DB_USER=your_user
+DB_PASSWORD=your_password
+DB_NAME=your_database
+```
+
+---
+
+## Database
+
+* Built with MySQL (Workbench)
+* Cloud-hosted for team access
+* Preloaded with sample data
