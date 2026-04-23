@@ -236,6 +236,20 @@ def delete_recipe(recipe_id):
 # INGREDIENTS
 # ──────────────────────────────────────────────
 
+
+@app.route('/api/ingredients', methods=['GET'])
+def get_ingredient():
+    try:
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM INGREDIENT")
+        ingredients = cursor.fetchall()
+        db.close()
+        return jsonify({"success": True, "ingredients": ingredients})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route('/api/ingredients', methods=['POST'])
 def insert_ingredient():
     try:
@@ -401,6 +415,19 @@ def delete_category(category_id):
 # DIETARY FLAGS
 # ──────────────────────────────────────────────
 
+@app.route('/api/dietary-flags', methods=['GET'])
+def get_dietary_flag():
+    try:
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM DIETARY_FLAG")
+        dietary_flag = cursor.fetchall()
+        db.close()
+        return jsonify({"success": True, "dietary-flags": dietary_flag})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route('/api/dietary-flags', methods=['POST'])
 def insert_dietary_flag():
     try:
@@ -455,6 +482,18 @@ def delete_dietary_flag(flag_id):
 # ──────────────────────────────────────────────
 # CUISINES
 # ──────────────────────────────────────────────
+
+@app.route('/api/cuisines', methods=['GET'])
+def get_cuisine():
+    try:
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM CUISINE")
+        cuisines = cursor.fetchall()
+        db.close()
+        return jsonify({"success": True, "cuisines": cuisines})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/cuisines', methods=['POST'])
 def insert_cuisine():

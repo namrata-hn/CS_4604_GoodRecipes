@@ -14,9 +14,25 @@ function LookupPanel({ endpoint, label, fields, showToast }) {
   const add = async () => {
     if (!form.name) return;
     const d = await API(`/api/${endpoint}`, { method: "POST", body: JSON.stringify(form) });
-    if (d.success) { showToast(`${label} added!`); setForm({}); setAdding(false); }
+    if (d.success) { showToast(`${label} added!`); setForm({}); setAdding(false); fetchItems() }
     else showToast(d.error, "error");
   };
+
+  const fetchItems = () => {
+    fetch(`/api/${endpoint}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setItems(data[endpoint]);
+        else showToast(data.error, "error");
+      })
+      .catch(() => {
+        showToast("Could not reach the server.", "error");
+      });
+  };
+
+  useEffect(() => {
+      fetchItems();
+  }, []);
 
   return (
     <div>
