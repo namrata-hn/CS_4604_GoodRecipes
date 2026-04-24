@@ -198,6 +198,34 @@ def get_recipe(user_id):
         return jsonify({"success": True, "recipes": recipes})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+    
+
+@app.route('/api/recipes/search', methods=['GET'])
+def search_recipes():
+    try:
+        title = request.args.get('title')
+
+        if not title:
+            return jsonify({"success": False, "error": "Title query parameter is required"}), 400
+
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+
+        query = """
+            SELECT * 
+            FROM RECIPE 
+            WHERE LOWER(title) LIKE LOWER(%s)
+        """
+        cursor.execute(query, (f"%{title}%",))
+
+        recipes = cursor.fetchall()
+        return jsonify({"success": True, "recipes": recipes})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally: 
+        db.close()
+
 
 
 @app.route('/api/recipes/<recipe_id>', methods=['PUT'])
@@ -601,6 +629,22 @@ def delete_collection(collection_id):
         return jsonify({"success": True, "affectedRows": cursor.rowcount})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+    
+@app.route('/api/collections', methods=['GET'])
+def get_collections():
+    try:
+        user_id = request.args.get('user_id')
+        if not user_id:
+            return jsonify({"success": False, "error": "user_id is required"}), 400
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM RECIPE_COLLECTION WHERE user_id = %s", (user_id,))
+        collections = cursor.fetchall()
+        return jsonify({"success": True, "collections": collections})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        db.close()
 
 
 # ──────────────────────────────────────────────

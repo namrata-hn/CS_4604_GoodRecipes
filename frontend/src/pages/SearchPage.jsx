@@ -12,20 +12,9 @@ export default function SearchPage() {
 
   const doSearch = async (term = q) => {
     if (!term.trim()) return;
-    // /api/query is kept on the backend specifically for flexible SELECT queries like search
-    const safe = term.replace(/'/g, "''");
-    const d = await API("/api/query", {
-      method: "POST",
-      body: JSON.stringify({
-        query: `SELECT * FROM RECIPE WHERE title LIKE '%${safe}%' LIMIT 20`,
-      }),
-    });
-    if (d.success && d.columns) {
-      // Backend returns columns + rows arrays; zip them into objects
-      const mapped = d.rows.map(row =>
-        Object.fromEntries(d.columns.map((c, i) => [c, row[i]]))
-      );
-      setResults(mapped);
+    const d = await API(`/api/recipes/search?title=${encodeURIComponent(term)}`);
+    if (d.success) {
+      setResults(d.recipes);
     } else {
       setResults([]);
     }
