@@ -74,16 +74,6 @@ export default function NavBar() {
           ))}
         </div>
 
-        <div className="nav-search">
-          <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.85rem" }}>🔍</span>
-          <input
-            value={q}
-            onChange={e => setQ(e.target.value)}
-            onKeyDown={handleSearch}
-            placeholder="Search recipes…"
-          />
-        </div>
-
         <div className="nav-user">
           {/* ── Username dropdown trigger ── */}
           <div className="nav-dropdown-wrap" ref={dropdownRef}>

@@ -10,28 +10,29 @@ function LookupPanel({ endpoint, label, fields, showToast }) {
   const [items, setItems] = useState([]);
   const [form, setForm] = useState({});
   const [adding, setAdding] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const add = async () => {
     if (!form.name) return;
     const d = await API(`/api/${endpoint}`, { method: "POST", body: JSON.stringify(form) });
-    if (d.success) { showToast(`${label} added!`); setForm({}); setAdding(false); fetchItems() }
+    if (d.success) { showToast(`${label} added!`); setForm({}); setAdding(false); fetchItems(); }
     else showToast(d.error, "error");
   };
 
   const fetchItems = () => {
+    setLoading(true);
     fetch(`/api/${endpoint}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) setItems(data[endpoint]);
         else showToast(data.error, "error");
       })
-      .catch(() => {
-        showToast("Could not reach the server.", "error");
-      });
+      .catch(() => showToast("Could not reach the server.", "error"))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
-      fetchItems();
+    fetchItems();
   }, []);
 
   return (
@@ -62,7 +63,9 @@ function LookupPanel({ endpoint, label, fields, showToast }) {
         </div>
       )}
 
-      {items.length === 0 ? (
+      {loading ? (
+        <div className="loading-state">Loading…</div>
+      ) : items.length === 0 ? (
         <EmptyState icon="🗂" message={`No ${label.toLowerCase()} records found. Add some above!`} />
       ) : (
         <div className="lookup-list">
@@ -84,8 +87,25 @@ function LookupPanel({ endpoint, label, fields, showToast }) {
 function Collections({ user, showToast }) {
   const [cols, setCols] = useState([]);
   const [adding, setAdding] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", privacy_status: "private" });
   const set = k => e => setForm(p => ({ ...p, [k]: e.target.value }));
+
+  const fetchCollections = () => {
+    setLoading(true);
+    fetch(`/api/collections?user_id=${user.user_id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setCols(data.collections);
+        else showToast(data.error, "error");
+      })
+      .catch(() => showToast("Could not reach the server.", "error"))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchCollections();
+  }, []);
 
   const add = async () => {
     if (!form.title) return;
@@ -145,7 +165,9 @@ function Collections({ user, showToast }) {
         </div>
       )}
 
-      {cols.length === 0 ? (
+      {loading ? (
+        <div className="loading-state">Loading…</div>
+      ) : cols.length === 0 ? (
         <EmptyState icon="📁" message="No collections yet. Create one to organize your favorite recipes!" />
       ) : (
         <div className="folder-grid">
