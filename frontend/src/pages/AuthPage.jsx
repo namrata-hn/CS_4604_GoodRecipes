@@ -72,7 +72,7 @@ export default function AuthPage() {
             <label>Role</label>
             <select value={f.role} onChange={set("role")}>
               <option value="user">User</option>
-              <option value="admin">Admin</option>
+              {/* <option value="admin">Admin</option> */}
             </select>
           </div>
         )}
