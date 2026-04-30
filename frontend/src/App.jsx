@@ -9,6 +9,7 @@ import MyRecipesPage from "./pages/MyRecipesPage";
 import BrowsePage    from "./pages/BrowsePage";
 import CommunityPage from "./pages/CommunityPage";
 import SearchPage    from "./pages/SearchPage";
+import AdminPage     from "./pages/AdminPage";
 
 import "./styles/reciply.css";
 
@@ -27,6 +28,7 @@ function AppLayout() {
         <Route path="/browse"    element={<BrowsePage />} />
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/search"    element={<SearchPage />} />
+        <Route path="/admin"     element={<AdminPage />} />
         <Route path="*"          element={<Navigate to="/" replace />} />
       </Routes>
     </>

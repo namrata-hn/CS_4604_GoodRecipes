@@ -7,7 +7,7 @@ export default function AuthPage() {
   const { setUser } = useUser();
   const navigate = useNavigate();
   const [tab, setTab] = useState("login");
-  const [f, setF] = useState({ username: "", email: "", password: "", role: "user" });
+  const [f, setF] = useState({ username: "", email: "", password: "", role: "" });
   const [err, setErr] = useState("");
 
   const set = k => e => setF(p => ({ ...p, [k]: e.target.value }));
@@ -20,7 +20,7 @@ export default function AuthPage() {
         body: JSON.stringify({ username: f.username, password: f.password }),
       });
       if (d.success) {
-        setUser({ user_id: d.user_id, username: f.username });
+        setUser({ user_id: d.user_id, username: f.username, role: d.role });
         navigate("/");
       } else {
         setErr(d.error || "Invalid username or password.");

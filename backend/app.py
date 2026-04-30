@@ -60,27 +60,28 @@ def insert_user():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-@app.route('/api/users/<int:user_id>', methods=['PUT'])
+@app.route('/api/update_user/<int:user_id>', methods=['PUT'])
 def update_user(user_id):
     try:
         data = request.get_json()
-        allowed = ['username', 'email', 'role']
-        fields = {k: v for k, v in data.items() if k in allowed and v}
-        if not fields:
-            return jsonify({"success": False, "error": "No valid fields to update."}), 400
-        set_clause = ", ".join(f"{k} = %s" for k in fields)
-        values = list(fields.values()) + [user_id]
+        username = data.get('username')
+        role = data.get('role')
+        if not username or role not in ('user', 'admin'):
+            return jsonify({"success": False, "error": "Invalid data."}), 400
         db = get_db()
         cursor = db.cursor()
-        cursor.execute(f"UPDATE USER SET {set_clause} WHERE user_id = %s", values)
+        cursor.execute(
+            "UPDATE USER SET username = %s, role = %s WHERE user_id = %s",
+            (username, role, user_id)
+        )
         db.commit()
         db.close()
-        return jsonify({"success": True, "affectedRows": cursor.rowcount})
+        return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-@app.route('/api/users/<int:user_id>', methods=['DELETE'])
+@app.route('/api/delete_user/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     try:
         db = get_db()
@@ -102,13 +103,13 @@ def login():
         db = get_db()
         cursor = db.cursor(dictionary=True)
         cursor.execute(
-            "SELECT user_id FROM USER WHERE username = %s AND password = %s",
+            "SELECT user_id, role FROM USER WHERE username = %s AND password = %s",
             (username, password)
         )
         user = cursor.fetchone()
         db.close()
         if user:
-            return jsonify({"success": True, "user_id": user['user_id']})
+            return jsonify({"success": True, "user_id": user['user_id'], "role": user['role']})
         else:
             return jsonify({"success": False, "error": "Invalid username or password"}), 401
     except Exception as e:
@@ -161,6 +162,18 @@ def change_password():
         db.commit()
         db.close()
         return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/users', methods=['GET'])
+def get_users():
+    try:
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT user_id, username, email, role FROM USER")
+        users = cursor.fetchall()
+        db.close()
+        return jsonify({"success": True, "users": users})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 

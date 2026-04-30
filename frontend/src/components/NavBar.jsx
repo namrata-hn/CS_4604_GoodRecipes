@@ -23,7 +23,6 @@ export default function NavBar() {
   const [pwOk, setPwOk] = useState("");
   const dropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handler = e => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target))
@@ -72,10 +71,17 @@ export default function NavBar() {
               {label}
             </NavLink>
           ))}
+          {user?.role === "admin" && (
+            <NavLink
+              to="/admin"
+              className={({ isActive }) => `nav-link admin-link${isActive ? " active" : ""}`}
+            >
+              Admin
+            </NavLink>
+          )}
         </div>
 
         <div className="nav-user">
-          {/* ── Username dropdown trigger ── */}
           <div className="nav-dropdown-wrap" ref={dropdownRef}>
             <button className="nav-username-btn" onClick={() => setDropdownOpen(o => !o)}>
               <span className="nav-avatar">{user?.username?.[0]?.toUpperCase()}</span>
@@ -91,6 +97,11 @@ export default function NavBar() {
                 <button className="nav-dropdown-item" onClick={() => { setShowPasswordModal(true); setDropdownOpen(false); }}>
                   🔒 Change Password
                 </button>
+                {user?.role === "admin" && (
+                  <button className="nav-dropdown-item" onClick={() => { navigate("/admin"); setDropdownOpen(false); }}>
+                    ⚙️ Admin Panel
+                  </button>
+                )}
                 <div className="nav-dropdown-divider" />
                 <button className="nav-dropdown-item danger" onClick={() => { setUser(null); navigate("/login"); }}>
                   ⬡ Sign Out
