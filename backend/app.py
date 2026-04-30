@@ -211,6 +211,18 @@ def get_recipe(user_id):
         return jsonify({"success": True, "recipes": recipes})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/recipes', methods=['GET'])
+def get_all_recipes():
+    try:
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM RECIPE")
+        recipes = cursor.fetchall()
+        db.close()
+        return jsonify({"success": True, "recipes": recipes})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
     
 
 @app.route('/api/recipes/search', methods=['GET'])
@@ -658,6 +670,59 @@ def get_collections():
         return jsonify({"success": False, "error": str(e)}), 500
     finally:
         db.close()
+
+# ──────────────────────────────────────────────
+# COLLECTION_RECIPE
+# ──────────────────────────────────────────────
+@app.route('/api/collection_recipe', methods=['POST'])
+def insert_collection_recipe():
+    try:
+        data = request.get_json()
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute(
+            "INSERT INTO COLLECTION_RECIPE (collection_id, recipe_id, added_at) VALUES (%s, %s, CURDATE())",
+            (data['collection_id'], data['recipe_id'])
+        )
+        db.commit()
+        db.close()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/collection_recipe/<int:collection_id>/<int:recipe_id>', methods=['DELETE'])
+def delete_collection_recipe(collection_id, recipe_id):
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute(
+            "DELETE FROM COLLECTION_RECIPE WHERE collection_id = %s AND recipe_id = %s",
+            (collection_id, recipe_id)
+        )
+        db.commit()
+        db.close()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+    
+
+@app.route('/api/collection_recipe/<int:collection_id>/recipes', methods=['GET'])
+def get_collection_recipes(collection_id):
+    try:
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT r.* FROM RECIPE r
+            JOIN COLLECTION_RECIPE cr ON r.recipe_id = cr.recipe_id
+            WHERE cr.collection_id = %s
+            ORDER BY cr.added_at DESC
+        """, (collection_id,))
+        recipes = cursor.fetchall()
+        db.close()
+        return jsonify({"success": True, "recipes": recipes})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+    
 
 
 # ──────────────────────────────────────────────

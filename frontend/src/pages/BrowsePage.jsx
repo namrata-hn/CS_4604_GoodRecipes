@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { API } from "../utils/api";
 import { useUser } from "../context/UserContext";
+import { Link } from "react-router-dom";
 import EmptyState from "../components/EmptyState";
 import Toast from "../components/Toast";
 import useToast from "../hooks/useToast";
@@ -172,16 +173,28 @@ function Collections({ user, showToast }) {
       ) : (
         <div className="folder-grid">
           {cols.map(c => (
-            <div className="folder-card" key={c.collection_id}>
-              <div className="folder-icon">📂</div>
-              <div className="folder-name">{c.title}</div>
-              <div className="folder-meta">{c.description || "No description"}</div>
-              <div className={`privacy-badge ${c.privacy_status === "public" ? "privacy-public" : "privacy-private"}`}>
-                {c.privacy_status === "public" ? "🌐 Public" : "🔒 Private"}
-              </div>
-              <div style={{ marginTop: "1rem" }}>
-                <button className="btn-sm btn-delete" onClick={() => del(c.collection_id)}>Delete</button>
-              </div>
+            <div style={{ position: "relative" }} key={c.collection_id}>
+              <Link
+                to={`/collections/${c.collection_id}`}
+                state={{ collection: c }}
+                className="folder-card"
+                style={{ textDecoration: "none", color: "inherit", display: "block" }}
+              >
+                <div className="folder-icon">📂</div>
+                <div className="folder-name">{c.title}</div>
+                <div className="folder-meta">{c.description || "No description"}</div>
+                <div className={`privacy-badge ${c.privacy_status === "public" ? "privacy-public" : "privacy-private"}`}>
+                  {c.privacy_status === "public" ? "🌐 Public" : "🔒 Private"}
+                </div>
+                <div style={{ marginTop: "1rem" }}>
+                  <button
+                    className="btn-sm btn-delete"
+                    onClick={e => { e.preventDefault(); e.stopPropagation(); del(c.collection_id); }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </Link>
             </div>
           ))}
         </div>

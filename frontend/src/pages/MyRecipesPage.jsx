@@ -75,16 +75,26 @@ export default function MyRecipesPage() {
 
   return (
     <div className="page">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4rem" }}>
-        <h1 className="page-title">My Recipes</h1>
-        <button className="btn-accent" onClick={() => setAdding(true)}>
+      <div style={{ 
+        display: "flex", 
+        alignItems: "center",
+        gap: "1rem",
+        marginBottom: "0.4rem", 
+        width: "100%"
+      }}>
+        <h1 className="page-title" style={{ margin: 0, flexShrink: 1, minWidth: 0 }}>
+          My Recipes
+        </h1>
+        <button className="btn-accent" style={{ flexShrink: 0 }} onClick={() => setAdding(true)}>
           + New Recipe
         </button>
       </div>
       <p className="page-sub">Recipes you've created and shared.</p>
 
       {loading ? (
-        <p className="loading">Loading recipes…</p>
+        <div>
+          <p className="loading">Loading recipes…</p>
+        </div>
       ) : loadError ? (
         <div style={{ textAlign: "center", padding: "3rem 1rem" }}>
           <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>⚠️</div>

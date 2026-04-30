@@ -10,6 +10,8 @@ import BrowsePage    from "./pages/BrowsePage";
 import CommunityPage from "./pages/CommunityPage";
 import SearchPage    from "./pages/SearchPage";
 import AdminPage     from "./pages/AdminPage";
+import CollectionsPage    from "./pages/CollectionsPage";
+
 
 import "./styles/reciply.css";
 
@@ -29,6 +31,7 @@ function AppLayout() {
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/search"    element={<SearchPage />} />
         <Route path="/admin"     element={<AdminPage />} />
+        <Route path="/collections/:collectionId" element={<CollectionsPage />} />
         <Route path="*"          element={<Navigate to="/" replace />} />
       </Routes>
     </>
