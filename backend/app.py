@@ -346,8 +346,32 @@ def delete_ingredient(ingredient_id):
 # REVIEWS
 # ──────────────────────────────────────────────
 
-@app.route('/api/reviews', methods=['POST'])
-def insert_review():
+@app.route('/api/reviews', methods=['GET'])
+def get_reviews():
+    try:
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT b.title, c.username, a.comment, a.rating FROM REVIEW a JOIN RECIPE b ON b.recipe_id = a.recipe_id JOIN USER c ON c.user_id = a.user_id")
+        reviews = cursor.fetchall()
+        db.close()
+        return jsonify({"success": True, "reviews": reviews})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+    
+@app.route('/api/reviews/<int:recipe_id>', methods=['GET'])
+def get_recipe_reviews(recipe_id):
+    try:
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT b.title, c.username, a.comment, a.rating FROM REVIEW a JOIN RECIPE b ON b.recipe_id = a.recipe_id JOIN USER c ON c.user_id = a.user_id WHERE b.recipe_id = %s", (recipe_id,))
+        reviews = cursor.fetchall()
+        db.close()
+        return jsonify({"success": True, "reviews": reviews})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/recipes/<int:recipe_id>/reviews', methods=['POST'])
+def insert_review(recipe_id):
     try:
         data = request.get_json()
         db = get_db()
@@ -355,7 +379,7 @@ def insert_review():
         new_id = int.from_bytes(os.urandom(5), byteorder='little') % 9999999999  # Generate a short unique ID for the recipe
         cursor.execute(
             "INSERT INTO REVIEW (review_id, recipe_id, user_id, comment, rating) VALUES (%s, %s, %s, %s, %s)",
-            (new_id, data['recipe_id'], data['user_id'], data.get('comment'), data.get('rating'))
+            (new_id, recipe_id, data['user_id'], data.get('comment'), data.get('rating'))
         )
         db.commit()
         db.close()
