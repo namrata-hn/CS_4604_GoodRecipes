@@ -78,6 +78,7 @@ export default function MyRecipesPage() {
       <div style={{ 
         display: "flex", 
         alignItems: "center",
+        justifyContent: "center",
         gap: "1rem",
         marginBottom: "0.4rem", 
         width: "100%"

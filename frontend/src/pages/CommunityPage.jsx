@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { API, Stars } from "../utils/api";
 import { useUser } from "../context/UserContext";
+import { useEffect } from "react";
 import Modal from "../components/Modal";
 import EmptyState from "../components/EmptyState";
 import Toast from "../components/Toast";
@@ -48,15 +49,28 @@ export default function CommunityPage() {
     } else showToast(d.error, "error");
   };
 
+  const fetchReviews = async () => {
+    const res = await fetch("/api/reviews");
+    const data = await res.json();
+    if (data.success) {
+      setReviews(data.reviews);
+    }
+    else {
+      console.error("Failed to fetch reviews:", data.error);
+      showToast("Failed to load reviews", "error");
+    }
+  };
+
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
   return (
     <div className="page">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4rem" }}>
+      <div style={{ justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
         <h1 className="page-title">Community</h1>
-        <button className="btn-accent" onClick={() => setAdding(v => !v)}>
-          {adding ? "✕ Cancel" : "+ Post Review"}
-        </button>
       </div>
-      <p className="page-sub">Share your thoughts and ratings on recipes.</p>
+      <p className="page-sub">See other users' thoughts and ratings on recipes.</p>
 
       {adding && (
         <div className="form-card">
@@ -87,11 +101,13 @@ export default function CommunityPage() {
           <div className="review-card" key={r.review_id}>
             <div className="review-stars"><Stars n={Number(r.rating)} /> ({r.rating}/5)</div>
             <div className="review-comment">{r.comment || "No comment."}</div>
-            <div className="review-meta">Recipe #{r.recipe_id}</div>
-            <div className="card-actions" style={{ marginTop: "0.75rem" }}>
-              <button className="btn-sm btn-edit" onClick={() => setEditing({ ...r })}>Edit</button>
-              <button className="btn-sm btn-delete" onClick={() => del(r.review_id)}>Delete</button>
-            </div>
+            <div className="review-meta">{r.title}</div>
+            {user?.role === "admin" && (
+              <div className="card-actions" style={{ marginTop: "0.75rem" }}>
+                <button className="btn-sm btn-edit" onClick={() => setEditing({ ...r })}>Edit</button>
+                <button className="btn-sm btn-delete" onClick={() => del(r.review_id)}>Delete</button>
+              </div>
+            )}
           </div>
         ))
       )}
